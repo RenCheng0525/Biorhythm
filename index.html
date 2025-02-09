@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biorhythm Calculator | 生物節律分析儀</title>
+    <style>
+        /* ===== Theme Variables ===== */
+        :root {
+            --bg-primary: #1a1b1e;
+            --bg-secondary: #2c2d31;
+            --bg-tertiary: #3a3b3f;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --accent-primary: #3a86ff;
+            --accent-secondary: #8338ec;
+            --success: #31c48d;
+            --warning: #ff9f1c;
+            --danger: #e5383b;
+            --highlight: #ffd700;
+            --border-radius: 12px;
+            --transition: all 0.3s ease;
+            --section-gap: 2rem;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --card-border: 1px solid var(--bg-tertiary);
+        }
+
+        /* Light theme variables */
+        :root[data-theme="light"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f5f5;
+            --bg-tertiary: #e8e8e8;
+            --text-primary: #1a1b1e;
+            --text-secondary: #666666;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        /* ===== Base Styles ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, "SF Pro TC", "Helvetica Neue",
+                "Microsoft JhengHei", sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: var(--transition);
+        }
+
+        /* ===== Layout Containers ===== */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--section-gap);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: var(--section-gap);
+            margin-top: var(--section-gap);
+        }
+
+        /* ===== Enhanced Navbar ===== */
+        .navbar {
+            background-color: var(--bg-secondary);
+            padding: 1rem 0;
+            box-shadow: var(--card-shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: var(--card-border);
+        }
+
+        .navbar-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .navbar h1 {
+            font-size: 1.5rem;
+            color: var(--accent-primary);
+            font-weight: 600;
+        }
+
+        /* Language selector */
+        .language-selector {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .language-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+        }
+
+        .language-btn.active {
+            color: var(--accent-primary);
+            background-color: var(--bg-tertiary);
+        }
+
+        /* ===== Control Panel ===== */
+        .control-panel {
+            background-color: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            position: sticky;
+            top: calc(60px + var(--section-gap));
+            height: fit-content;
+            box-shadow: var(--card-shadow);
+            border: var(--card-border);
+        }
+
+        .control-panel h2 {
+            color: var(--accent-primary);
+            margin-bottom: 1.5rem;
+            font-size: 1.25rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--bg-tertiary);
+        }
+
+        /* ===== Input Groups ===== */
+        .input-group {
+            margin-bottom: 1.5rem;
+            background: var(--bg-primary);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            border: var(--card-border);
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--bg-tertiary);
+            border-radius: var(--border-radius);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: var(--transition);
+        }
+
+        .input-group input:focus {
+            border-color: var(--accent-primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(58, 134, 255, 0.2);
+        }
+
+        /* ===== Button Styles ===== */
+        .btn {
+            width: 100%;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-primary);
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        /* ===== Data Display ===== */
+        .data-display {
+            background-color: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            border: var(--card-border);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .data-display h2 {
+            color: var(--accent-primary);
+            font-size: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--bg-tertiary);
+            margin: 0;
+        }
+
+        /* ===== Table Styles ===== */
+        .table-container {
+            background-color: var(--bg-primary);
+            border-radius: var(--border-radius);
+            border: var(--card-border);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .table-header {
+            background-color: var(--bg-secondary);
+            padding: 1rem;
+            border-bottom: 2px solid var(--bg-tertiary);
+            display: grid;
+            grid-template-columns: 2fr 1.5fr 1.5fr 1.5fr 1.5fr;
+            gap: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .table-header-cell {
+            font-size: 1rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .table-header h3 {
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .table-body-container {
+            overflow-y: auto;
+            max-height: 500px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent-primary) var(--bg-tertiary);
+        }
+
+        .table-body-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .table-body-container::-webkit-scrollbar-track {
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+        }
+
+        .table-body-container::-webkit-scrollbar-thumb {
+            background-color: var(--accent-primary);
+            border-radius: 4px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+
+        .data-table tr:hover {
+            background-color: var(--bg-tertiary);
+        }
+
+        /* ===== Status Badges ===== */
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: inline-block;
+            text-align: center;
+            min-width: 100px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-positive {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .status-neutral {
+            background-color: var(--warning);
+            color: white;
+        }
+
+        .status-negative {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        /* Today highlight */
+        .today-row {
+            background-color: rgba(255, 215, 0, 0.1) !important;
+        }
+
+        .today-row td {
+            font-weight: bold;
+        }
+
+        .today-label {
+            background-color: var(--highlight);
+            color: var(--bg-primary);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            margin-left: 0.5rem;
+            font-weight: bold;
+        }
+
+        #dateHeader,
+        #statusHeader {
+            color: var(--accent-primary);
+        }
+
+        /* ===== Modal Styles ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.show {
+            opacity: 1;
+        }
+
+        .modal-content {
+            position: relative;
+            background-color: var(--bg-secondary);
+            margin: 5% auto;
+            padding: 2rem;
+            width: 90%;
+            max-width: 800px;
+            border-radius: var(--border-radius);
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: var(--card-shadow);
+            border: var(--card-border);
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .modal.show .modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .close-button {
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: var(--transition);
+            padding: 0.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: var(--bg-primary);
+            border: var(--card-border);
+        }
+
+        .close-button:hover {
+            color: var(--text-primary);
+            background-color: var(--bg-tertiary);
+        }
+
+        /* Modal Tabs */
+        .tab-container {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--bg-tertiary);
+            padding-bottom: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+            color: var(--text-secondary);
+            background-color: var(--bg-primary);
+            border: var(--card-border);
+            font-weight: 500;
+        }
+
+        .tab:hover {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .tab.active {
+            background-color: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 1rem;
+            background-color: var(--bg-primary);
+            border-radius: var(--border-radius);
+            border: var(--card-border);
+            margin-bottom: 1rem;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .tab-content h3 {
+            margin-bottom: 1rem;
+            color: var(--accent-primary);
+            font-size: 1.25rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+
+        .tab-content ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .tab-content li {
+            padding: 1rem;
+            background-color: var(--bg-secondary);
+            border-radius: var(--border-radius);
+            border: var(--card-border);
+        }
+
+        .tab-content li strong {
+            color: var(--accent-primary);
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        /* ===== Chart Container ===== */
+        .chart-container {
+            background-color: var(--bg-primary);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            height: 400px;
+            border: var(--card-border);
+            position: relative;
+        }
+
+        #chart {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* ===== Notification Styles ===== */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            box-shadow: var(--card-shadow);
+            z-index: 1000;
+            max-width: 300px;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+            border: var(--card-border);
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .notification-content {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .notification-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .notification-message {
+            flex-grow: 1;
+            font-size: 0.875rem;
+        }
+
+        .notification-success .notification-icon {
+            background: var(--success);
+            color: white;
+        }
+
+        .notification-error .notification-icon {
+            background: var(--danger);
+            color: white;
+        }
+
+        .notification-warning .notification-icon {
+            background: var(--warning);
+            color: white;
+        }
+
+        /* ===== Theme Toggle ===== */
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: var(--transition);
+            font-size: 1.25rem;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bg-tertiary);
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--bg-primary);
+            transform: scale(1.1);
+        }
+
+        /* ===== Animations ===== */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            to {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+        }
+
+        /* ===== Responsive Design ===== */
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .control-panel {
+                position: static;
+            }
+
+            .table-header {
+                grid-template-columns: 2fr 1.5fr 1.5fr 1.5fr 1.5fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .navbar-content {
+                padding: 0 1rem;
+            }
+
+            .modal-content {
+                width: 95%;
+                margin: 2.5% auto;
+            }
+
+            .tab-container {
+                gap: 0.5rem;
+            }
+
+            .data-table {
+                font-size: 0.9rem;
+            }
+
+            .status-badge {
+                min-width: 80px;
+                padding: 0.4rem 0.8rem;
+            }
+
+            .table-header {
+                font-size: 0.9rem;
+                padding: 0.75rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="navbar-content">
+            <h1 id="appTitle">生物節律分析儀</h1>
+            <div class="controls">
+                <div class="language-selector">
+                    <button class="language-btn active" onclick="changeLanguage('zh')" data-lang="zh">中文</button>
+                    <button class="language-btn" onclick="changeLanguage('en')" data-lang="en">English</button>
+                    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+                        🌓
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="main-content">
+            <!-- Control Panel -->
+            <div class="control-panel">
+                <h2 id="controlPanelTitle">控制面板</h2>
+                <div class="input-group">
+                    <label id="birthDateLabel">出生日期</label>
+                    <input type="date" id="birthDate">
+                </div>
+
+                <button class="btn btn-primary" onclick="calculate()" id="calculateBtn">
+                    開始分析
+                </button>
+                <button class="btn btn-secondary" onclick="showInfo()" id="infoBtn">
+                    使用說明
+                </button>
+            </div>
+
+            <!-- Data Display -->
+            <div class="data-display">
+                <h2 id="resultsTitle">生物節律分析結果</h2>
+
+                <div class="chart-container">
+                    <svg id="chart"></svg>
+                </div>
+
+                <div class="table-container">
+                    <div class="table-header">
+                        <div class="table-header-cell" id="dateHeader">日期</div>
+                        <div class="table-header-cell" id="physicalHeader">體力週期</div>
+                        <div class="table-header-cell" id="emotionalHeader">情緒週期</div>
+                        <div class="table-header-cell" id="intellectualHeader">智力週期</div>
+                        <div class="table-header-cell" id="statusHeader">綜合狀態</div>
+                    </div>
+                    <div class="table-body-container">
+                        <table class="data-table">
+                            <tbody id="rhythmTableBody">
+                                <!-- JavaScript will dynamically fill data -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== Language Support =====
+        const translations = {
+            zh: {
+                appTitle: '生物節律分析儀',
+                controlPanelTitle: '控制面板',
+                birthDate: '出生日期',
+                analyze: '開始分析',
+                guide: '使用說明',
+                resultsTitle: '生物節律分析結果',
+                date: '日期',
+                physicalCycle: '體力週期',
+                emotionalCycle: '情緒週期',
+                intellectualCycle: '智力週期',
+                status: '綜合狀態',
+                today: '今日',
+                peak: '高峰期',
+                valley: '低谷期',
+                transition: '轉換期',
+                rising: '上升期',
+                falling: '下降期',
+                optimal: '理想',
+                warning: '警告',
+                rest: '休養',
+                stable: '平穩',
+                theory: '理論基礎',
+                interpretation: '數據解讀',
+                usage: '使用建議',
+                enterBirthDate: '請輸入出生日期',
+                invalidBirthDate: '出生日期不能晚於當前日期',
+                invalidDateFormat: '日期格式錯誤，請檢查輸入',
+                theoreticalBase: '生物節律理論源於19世紀末期的科學研究 (偽科學)，描述了人體三個基本的生理週期：',
+                dataInterpretation: '生物節律數值範圍在 -100% 到 +100% 之間：',
+                usageGuidelines: '使用建議：',
+                today: '今天'
+            },
+            en: {
+                appTitle: 'Biorhythm Calculator',
+                controlPanelTitle: 'Control Panel',
+                birthDate: 'Birth Date',
+                analyze: 'Analyze',
+                guide: 'Guide',
+                resultsTitle: 'Biorhythm Analysis Results',
+                date: 'Date',
+                physicalCycle: 'Physical Cycle',
+                emotionalCycle: 'Emotional Cycle',
+                intellectualCycle: 'Intellectual Cycle',
+                status: 'Status',
+                today: 'Today',
+                peak: 'Peak',
+                valley: 'Valley',
+                transition: 'Transition',
+                rising: 'Rising',
+                falling: 'Falling',
+                optimal: 'Optimal',
+                warning: 'Warning',
+                rest: 'Rest',
+                stable: 'Stable',
+                theory: 'Theory',
+                interpretation: 'Interpretation',
+                usage: 'Usage Guide',
+                enterBirthDate: 'Please enter birth date',
+                invalidBirthDate: 'Birth date cannot be later than current date',
+                invalidDateFormat: 'Invalid date format, please check your input',
+                theoreticalBase: 'Biorhythm theory, originating from late 19th century research (Pseudoscience), describes three basic physiological cycles:',
+                dataInterpretation: 'Biorhythm values range from -100% to +100%:',
+                usageGuidelines: 'Usage Guidelines:',
+                today: 'Today'
+            }
+        };
+
+        let currentLang = 'zh';
+
+        function changeLanguage(lang) {
+            currentLang = lang;
+            document.querySelectorAll('.language-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === lang);
+            });
+            updateUIText();
+        }
+
+        function getText(key) {
+            return translations[currentLang][key] || translations['en'][key] || key;
+        }
+
+        function updateUIText() {
+            // 更新页面标题和基本 UI 元素
+            document.getElementById('appTitle').textContent = getText('appTitle');
+            document.getElementById('controlPanelTitle').textContent = getText('controlPanelTitle');
+            document.getElementById('birthDateLabel').textContent = getText('birthDate');
+            document.getElementById('calculateBtn').textContent = getText('analyze');
+            document.getElementById('infoBtn').textContent = getText('guide');
+            document.getElementById('resultsTitle').textContent = getText('resultsTitle');
+
+            // 更新表格标题文本和颜色
+            const dateHeader = document.getElementById('dateHeader');
+            const physicalHeader = document.getElementById('physicalHeader');
+            const emotionalHeader = document.getElementById('emotionalHeader');
+            const intellectualHeader = document.getElementById('intellectualHeader');
+            const statusHeader = document.getElementById('statusHeader');
+
+            // 设置文本内容
+            dateHeader.textContent = getText('date');
+            physicalHeader.textContent = getText('physicalCycle');
+            emotionalHeader.textContent = getText('emotionalCycle');
+            intellectualHeader.textContent = getText('intellectualCycle');
+            statusHeader.textContent = getText('status');
+
+            // 设置颜色
+            dateHeader.style.color = 'var(--accent-primary)';  // 使用默认强调色
+            physicalHeader.style.color = CYCLES.physical.color;
+            emotionalHeader.style.color = CYCLES.emotional.color;
+            intellectualHeader.style.color = CYCLES.intellectual.color;
+            statusHeader.style.color = 'var(--accent-primary)';  // 使用默认强调色
+
+            // 如果已有数据，重新计算显示
+            if (document.querySelector('.data-table tbody').children.length > 0) {
+                calculate();
+            }
+        }
+
+        // ===== Core Calculation Functions =====
+        const CYCLES = {
+            physical: {
+                days: 23,
+                name: {
+                    zh: '體力',
+                    en: 'Physical'
+                },
+                color: '#ff6b6b',  // 体力周期颜色
+                description: {
+                    zh: '影響體力、耐力、健康狀況',
+                    en: 'Affects physical strength, endurance, and health'
+                }
+            },
+            emotional: {
+                days: 28,
+                name: {
+                    zh: '情緒',
+                    en: 'Emotional'
+                },
+                color: '#4ecdc4',  // 情绪周期颜色
+                description: {
+                    zh: '影響心情、感受、人際關係',
+                    en: 'Affects mood, feelings, and relationships'
+                }
+            },
+            intellectual: {
+                days: 33,
+                name: {
+                    zh: '智力',
+                    en: 'Intellectual'
+                },
+                color: '#45b7d1',  // 智力周期颜色
+                description: {
+                    zh: '影響思維、學習、決策能力',
+                    en: 'Affects thinking, learning, and decision-making'
+                }
+            }
+        };
+
+        const STATUS_THRESHOLDS = {
+            critical: 5,
+            high: 70,
+            low: -70
+        };
+
+        function calculateSingleRhythm(days, type) {
+            const cycle = CYCLES[type].days;
+            return Math.sin(2 * Math.PI * days / cycle) * 100;
+        }
+
+        function calculateBiorhythm(days) {
+            const results = {};
+
+            for (const [type, cycle] of Object.entries(CYCLES)) {
+                const value = calculateSingleRhythm(days, type);
+                results[type] = {
+                    value: value,
+                    status: getRhythmStatus(value),
+                    phase: getRhythmPhase(value)
+                };
+            }
+
+            return results;
+        }
+
+        function getRhythmStatus(value) {
+            if (Math.abs(value) < STATUS_THRESHOLDS.critical) return 'critical';
+            if (value > STATUS_THRESHOLDS.high) return 'peak';
+            if (value < STATUS_THRESHOLDS.low) return 'valley';
+            return value > 0 ? 'positive' : 'negative';
+        }
+
+        function getRhythmPhase(value) {
+            const phases = {
+                zh: {
+                    transition: '轉換期',
+                    rising: '上升期',
+                    peak: '高峰期',
+                    falling: '下降期',
+                    valley: '低谷期'
+                },
+                en: {
+                    transition: 'Transition',
+                    rising: 'Rising',
+                    peak: 'Peak',
+                    falling: 'Falling',
+                    valley: 'Valley'
+                }
+            };
+
+            if (Math.abs(value) < STATUS_THRESHOLDS.critical)
+                return phases[currentLang].transition;
+            if (value > 0)
+                return value > 50 ? phases[currentLang].peak : phases[currentLang].rising;
+            return value < -50 ? phases[currentLang].valley : phases[currentLang].falling;
+        }
+
+        function getCompositeStatus(dayData) {
+            const criticalCount = Object.values(dayData).filter(
+                rhythm => rhythm.status === 'critical'
+            ).length;
+
+            const avgValue = Object.values(dayData).reduce(
+                (sum, rhythm) => sum + rhythm.value, 0
+            ) / Object.keys(CYCLES).length;
+
+            const status = {
+                critical: { zh: '警告', en: 'Warning' },
+                peak: { zh: '理想', en: 'Optimal' },
+                valley: { zh: '休養', en: 'Rest' },
+                normal: { zh: '平穩', en: 'Stable' }
+            };
+
+            if (criticalCount >= 2) return { status: 'critical', label: status.critical[currentLang] };
+            if (avgValue > 50) return { status: 'peak', label: status.peak[currentLang] };
+            if (avgValue < -50) return { status: 'valley', label: status.valley[currentLang] };
+            return { status: 'normal', label: status.normal[currentLang] };
+        }
+
+        function drawChart(data) {
+            const svg = document.getElementById('chart');
+            svg.innerHTML = '';
+
+            const width = svg.clientWidth;
+            const height = svg.clientHeight;
+            const padding = 40;
+
+            function createSVGElement(type) {
+                return document.createElementNS('http://www.w3.org/2000/svg', type);
+            }
+
+            const xScale = d => (d + 15) * (width - 2 * padding) / 30 + padding;
+            const yScale = v => height / 2 - (v * (height - 2 * padding) / 200);
+
+            function drawGrid() {
+                const grid = createSVGElement('g');
+                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                const gridColor = isDark ? '#2c2d31' : '#e5e5e5';
+                const textColor = isDark ? '#a0a0a0' : '#666666';
+
+                // 水平网格线和Y轴标签
+                for (let i = -100; i <= 100; i += 25) {
+                    const y = yScale(i);
+                    const line = createSVGElement('line');
+                    line.setAttribute('x1', padding);
+                    line.setAttribute('y1', y);
+                    line.setAttribute('x2', width - padding);
+                    line.setAttribute('y2', y);
+                    line.setAttribute('stroke', gridColor);
+                    line.setAttribute('stroke-width', i === 0 ? 1 : 0.5);
+                    if (i !== 0) line.setAttribute('stroke-dasharray', '4,4');
+                    grid.appendChild(line);
+
+                    if (i % 50 === 0) {
+                        const text = createSVGElement('text');
+                        text.setAttribute('x', padding - 5);
+                        text.setAttribute('y', y + 5);
+                        text.setAttribute('fill', textColor);
+                        text.setAttribute('text-anchor', 'end');
+                        text.setAttribute('font-size', '12');
+                        text.textContent = i + '%';  // 添加百分比符号
+                        grid.appendChild(text);
+                    }
+                }
+
+                // 垂直网格线和日期标记
+                const dateMarkers = [-15, -10, -5, 0, 5, 10, 15];
+                dateMarkers.forEach(i => {
+                    const x = xScale(i);
+                    const line = createSVGElement('line');
+                    line.setAttribute('x1', x);
+                    line.setAttribute('y1', padding);
+                    line.setAttribute('x2', x);
+                    line.setAttribute('y2', height - padding);
+                    line.setAttribute('stroke', gridColor);
+                    line.setAttribute('stroke-width', i === 0 ? 1 : 0.5);
+                    if (i === 0) {
+                        line.setAttribute('stroke', 'var(--highlight)');
+                        line.setAttribute('stroke-width', 2);
+                    } else {
+                        line.setAttribute('stroke-dasharray', '4,4');
+                    }
+                    grid.appendChild(line);
+
+                    // 创建日期标签
+                    const text = createSVGElement('text');
+                    text.setAttribute('x', x);
+                    text.setAttribute('y', height - padding + 35);
+                    text.setAttribute('fill', textColor);
+                    text.setAttribute('text-anchor', 'middle');
+                    text.setAttribute('font-size', '12');
+
+                    // 计算对应的日期
+                    const date = new Date();
+                    date.setDate(date.getDate() + i);
+
+                    // 根据位置设置不同的文本
+                    if (i === 0) {
+                        text.textContent = getText('today');  // 使用多语言的"今天"
+                        text.setAttribute('fill', 'var(--highlight)');
+                        text.setAttribute('font-weight', 'bold');
+                    } else {
+                        // 格式化为 MM/DD
+                        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                        const day = date.getDate().toString().padStart(2, '0');
+                        text.textContent = `${month}/${day}`;
+                    }
+                    grid.appendChild(text);
+
+                    // 为今天添加特殊标记
+                    if (i === 0) {
+                        const todayMarker = createSVGElement('line');
+                        todayMarker.setAttribute('x1', x);
+                        todayMarker.setAttribute('x2', x);
+                        todayMarker.setAttribute('y1', padding - 15);
+                        todayMarker.setAttribute('y2', height - padding + 5);
+                        todayMarker.setAttribute('stroke', 'var(--highlight)');
+                        todayMarker.setAttribute('stroke-width', 1);
+                        todayMarker.setAttribute('stroke-dasharray', '4,4');
+                        grid.appendChild(todayMarker);
+                    }
+                });
+
+                return grid;
+            }
+
+            function drawRhythmCurve(type, data) {
+                let path = `M ${xScale(data[0].day)} ${yScale(data[0][type].value)}`;
+                for (let i = 1; i < data.length; i++) {
+                    path += ` L ${xScale(data[i].day)} ${yScale(data[i][type].value)}`;
+                }
+
+                const curve = createSVGElement('path');
+                curve.setAttribute('d', path);
+                curve.setAttribute('stroke', CYCLES[type].color);
+                curve.setAttribute('stroke-width', '2');
+                curve.setAttribute('fill', 'none');
+
+                curve.setAttribute('stroke-dasharray', curve.getTotalLength());
+                curve.setAttribute('stroke-dashoffset', curve.getTotalLength());
+                curve.innerHTML = `
+            <animate 
+                attributeName="stroke-dashoffset" 
+                from="${curve.getTotalLength()}" 
+                to="0" 
+                dur="1.5s" 
+                fill="freeze"
+                calcMode="spline"
+                keySplines="0.4 0 0.2 1"/>
+        `;
+
+                return curve;
+            }
+
+            svg.appendChild(drawGrid());
+            Object.keys(CYCLES).forEach(type => {
+                svg.appendChild(drawRhythmCurve(type, data));
+            });
+        }
+
+        function updateTable(data) {
+            const tbody = document.getElementById('rhythmTableBody');
+            tbody.innerHTML = '';
+
+            data.forEach(day => {
+                const row = document.createElement('tr');
+                const date = new Date(day.date);
+
+                // 高亮今日行
+                if (day.day === 0) {
+                    row.classList.add('today-row');
+                }
+
+                const dateStr = date.toLocaleDateString(currentLang === 'zh' ? 'zh-TW' : 'en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    weekday: 'short'
+                });
+
+                const todayLabel = day.day === 0 ?
+                    `<span class="today-label">${getText('today')}</span>` : '';
+
+                row.innerHTML = `
+            <td>${dateStr}${todayLabel}</td>
+            ${Object.entries(CYCLES).map(([type, cycle]) => `
+                <td>
+                    <span class="status-badge ${getStatusClass(day[type].status)}">
+                        ${day[type].value.toFixed(1)}%
+                        <br>
+                        <small>${day[type].phase}</small>
+                    </span>
+                </td>
+            `).join('')}
+            <td>
+                <span class="status-badge ${getStatusClass(getCompositeStatus(day).status)}">
+                    ${getCompositeStatus(day).label}
+                </span>
+            </td>
+        `;
+
+                tbody.appendChild(row);
+            });
+
+            // 滚动到今日行
+            const tableContainer = document.querySelector('.table-body-container');
+            const todayRow = tbody.querySelector('.today-row');
+            if (todayRow) {
+                todayRow.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            }
+        }
+
+        function validateDates() {
+            const birthDate = new Date(document.getElementById('birthDate').value);
+            const currentDate = new Date();
+
+            try {
+                if (!document.getElementById('birthDate').value) {
+                    showNotification(getText('enterBirthDate'), 'error');
+                    return false;
+                }
+
+                if (birthDate > currentDate) {
+                    showNotification(getText('invalidBirthDate'), 'error');
+                    return false;
+                }
+
+                const maxAge = 150;
+                const minDate = new Date();
+                minDate.setFullYear(minDate.getFullYear() - maxAge);
+
+                if (birthDate < minDate) {
+                    showNotification(getText('invalidBirthDate'), 'error');
+                    return false;
+                }
+
+                return true;
+            } catch (error) {
+                console.error('Date validation error:', error);
+                showNotification(getText('invalidDateFormat'), 'error');
+                return false;
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            // 移除现有的通知
+            const existingNotification = document.querySelector('.notification');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.innerHTML = `
+                <div class="notification-content">
+                    <span class="notification-icon">${getNotificationIcon(type)}</span>
+                    <span class="notification-message">${message}</span>
+                </div>
+            `;
+
+            document.body.appendChild(notification);
+            // 使用 requestAnimationFrame 确保 DOM 更新后再添加 show 类
+            requestAnimationFrame(() => {
+                notification.classList.add('show');
+            });
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        function getNotificationIcon(type) {
+            switch (type) {
+                case 'success': return '✓';
+                case 'error': return '!';
+                case 'warning': return '⚠';
+                default: return 'i';
+            }
+        }
+
+        function getStatusClass(status) {
+            switch (status) {
+                case 'peak': return 'status-positive';
+                case 'critical': return 'status-negative';
+                case 'valley': return 'status-negative';
+                default: return 'status-neutral';
+            }
+        }
+
+        function calculate() {
+            if (!validateDates()) return;
+
+            const birthDate = new Date(document.getElementById('birthDate').value);
+            const currentDate = new Date();
+            const daysDiff = Math.floor((currentDate - birthDate) / (1000 * 60 * 60 * 24));
+
+            const data = [];
+            // 计算前后15天的数据
+            for (let i = -15; i <= 15; i++) {
+                const date = new Date(currentDate);
+                date.setDate(date.getDate() + i);
+
+                data.push({
+                    day: i,
+                    date: date,
+                    ...calculateBiorhythm(daysDiff + i)
+                });
+            }
+
+            drawChart(data);
+            updateTable(data);
+        }
+
+        function showInfo() {
+            let modal = document.getElementById('infoModal');
+            if (!modal) {
+                modal = createInfoModal();
+                document.body.appendChild(modal);
+            }
+            modal.style.display = 'block';
+            requestAnimationFrame(() => {
+                modal.classList.add('show');
+            });
+
+            // 确保每次打开时内容都是当前语言的
+            updateModalContent(modal);
+
+            modal.addEventListener('click', (event) => {
+                if (event.target === modal) {
+                    closeInfo();
+                }
+            });
+        }
+
+        function closeInfo() {
+            const modal = document.getElementById('infoModal');
+            if (modal) {
+                modal.classList.remove('show');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 300);
+            }
+        }
+
+        function updateModalContent(modal) {
+            const content = {
+                zh: {
+                    theory: {
+                        title: '理論基礎',
+                        content: `
+                    <p>${getText('theoreticalBase')}</p>
+                    <br/>
+                    <p>詳細資訊請參考: <a href="https://zh.wikipedia.org/zh-tw/%E7%94%9F%E7%90%86%E8%8A%82%E5%BE%8B" target="_blank" style="color: var(--accent-primary);">維基百科 - 生理節律</a></p>
+                    <br/>
+                    <ul>
+                        <li><strong>體力週期 (23天)</strong><br>影響體力、耐力、免疫力、傷口癒合等身體機能</li>
+                        <li><strong>情緒週期 (28天)</strong><br>影響情緒穩定性、感性認知、創造力、社交能力</li>
+                        <li><strong>智力週期 (33天)</strong><br>影響邏輯思維、學習能力、記憶力、分析判斷</li>
+                    </ul>`
+                    },
+                    interpret: {
+                        title: '數據解讀',
+                        content: `
+                    <p>${getText('dataInterpretation')}</p>
+                    <br/>
+                    <ul>
+                        <li><strong>高峰期 (50% ~ 100%)</strong><br>最佳狀態，適合進行相應領域的重要活動</li>
+                        <li><strong>上升期 (0% ~ 50%)</strong><br>狀態逐漸提升，可開始規劃重要活動</li>
+                        <li><strong>下降期 (-50% ~ 0%)</strong><br>狀態逐漸下降，需要適當調整活動強度</li>
+                        <li><strong>低谷期 (-100% ~ -50%)</strong><br>休養生息的時期，避免高強度活動</li>
+                    </ul>`
+                    },
+                    usage: {
+                        title: '使用建議',
+                        content: `
+                    <ul>
+                        <li><strong>活動安排建議</strong>
+                            <br>• 重要運動比賽 → 選擇體力週期高峰期
+                            <br>• 創作或演講 → 選擇情緒週期高峰期
+                            <br>• 考試面試 → 選擇智力週期高峰期
+                        </li>
+                        <li><strong>臨界日注意事項</strong>
+                            <br>• 體力臨界日：避免劇烈運動
+                            <br>• 情緒臨界日：避免重要社交
+                            <br>• 智力臨界日：避免重大決策
+                        </li>
+                        <li><strong>使用建議</strong>
+                            <br>• 建議作為參考，不要完全依賴
+                            <br>• 結合自身實際狀況做調整
+                            <br>• 保持規律的生活作息更重要
+                        </li>
+                    </ul>`
+                    }
+                },
+                en: {
+                    theory: {
+                        title: 'Theoretical Foundation',
+                        content: `
+                    <p>${getText('theoreticalBase')}</p>
+                    <br/>
+                    <p>For more information, see: <a href="https://en.wikipedia.org/wiki/Biorhythm_(pseudoscience)" target="_blank" style="color: var(--accent-primary);">Wikipedia - Biorhythm</a></p>
+                    <br/>
+                    <ul>
+                        <li><strong>Physical Cycle (23 days)</strong><br>Affects physical strength, endurance, immunity, and healing</li>
+                        <li><strong>Emotional Cycle (28 days)</strong><br>Affects emotional stability, creativity, and social abilities</li>
+                        <li><strong>Intellectual Cycle (33 days)</strong><br>Affects logical thinking, learning ability, and memory</li>
+                    </ul>`
+                    },
+                    interpret: {
+                        title: 'Data Interpretation',
+                        content: `
+                    <p>${getText('dataInterpretation')}</p>
+                    <br/>
+                    <ul>
+                        <li><strong>Peak Period (50% ~ 100%)</strong><br>Optimal state for important activities</li>
+                        <li><strong>Rising Period (0% ~ 50%)</strong><br>Gradually improving condition</li>
+                        <li><strong>Falling Period (-50% ~ 0%)</strong><br>Declining state, adjust activity intensity</li>
+                        <li><strong>Valley Period (-100% ~ -50%)</strong><br>Rest period, avoid intensive activities</li>
+                    </ul>`
+                    },
+                    usage: {
+                        title: 'Usage Guidelines',
+                        content: `
+                    <ul>
+                        <li><strong>Activity Planning</strong>
+                            <br>• Important sports events → Choose physical cycle peak
+                            <br>• Creative work or presentations → Choose emotional cycle peak
+                            <br>• Exams or interviews → Choose intellectual cycle peak
+                        </li>
+                        <li><strong>Critical Day Precautions</strong>
+                            <br>• Physical critical days: Avoid intense exercise
+                            <br>• Emotional critical days: Avoid important social events
+                            <br>• Intellectual critical days: Avoid major decisions
+                        </li>
+                        <li><strong>Usage Tips</strong>
+                            <br>• Use as reference, don't rely completely
+                            <br>• Adjust according to personal conditions
+                            <br>• Maintaining regular routines is more important
+                        </li>
+                    </ul>`
+                    }
+                }
+            };
+
+            const lang = content[currentLang];
+            const modalContent = modal.querySelector('.modal-content') || modal;
+
+            modalContent.innerHTML = `
+        <span class="close-button" onclick="closeInfo()">×</span>
+        <div class="tab-container">
+            <div class="tab active" onclick="switchInfoTab(event, 'theory')">${lang.theory.title}</div>
+            <div class="tab" onclick="switchInfoTab(event, 'interpret')">${lang.interpret.title}</div>
+            <div class="tab" onclick="switchInfoTab(event, 'usage')">${lang.usage.title}</div>
+        </div>
+
+        <div id="theory" class="tab-content active">
+            <h3>${lang.theory.title}</h3>
+            ${lang.theory.content}
+        </div>
+
+        <div id="interpret" class="tab-content">
+            <h3>${lang.interpret.title}</h3>
+            ${lang.interpret.content}
+        </div>
+
+        <div id="usage" class="tab-content">
+            <h3>${lang.usage.title}</h3>
+            ${lang.usage.content}
+        </div>
+    `;
+        }
+
+        function createInfoModal() {
+            const modal = document.createElement('div');
+            modal.id = 'infoModal';
+            modal.className = 'modal';
+            modal.innerHTML = '<div class="modal-content"></div>';
+            return modal;
+        }
+
+        function switchInfoTab(event, tabName) {
+            const tabs = document.querySelectorAll('.modal .tab');
+            const contents = document.querySelectorAll('.modal .tab-content');
+
+            tabs.forEach(tab => tab.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        function initThemeToggle() {
+            const themeToggle = document.getElementById('themeToggle');
+            const root = document.documentElement;
+
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            root.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = root.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+                root.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateThemeIcon(newTheme);
+
+                const chartData = document.querySelector('.chart-container svg').innerHTML;
+                if (chartData) {
+                    calculate();
+                }
+            });
+        }
+
+        function updateThemeIcon(theme) {
+            const themeToggle = document.getElementById('themeToggle');
+            themeToggle.innerHTML = theme === 'dark' ? '🌞' : '🌙';
+            themeToggle.title = theme === 'dark' ? '切換至亮色主題' : '切換至暗色主題';
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initThemeToggle();
+            changeLanguage('zh');
+        });
+    </script>
+</body>
+
+</html>
